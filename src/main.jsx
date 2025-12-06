@@ -1,6 +1,7 @@
 import { createAppKit } from "@reown/appkit";
 import { EthersAdapter } from "@reown/appkit-adapter-ethers";
 import { mainnet, arbitrum } from "@reown/appkit/networks";
+import { createRoot } from "react-dom/client";
 function Root() {
   // create a safe adapter factory that only runs in browser
 const modal = createAppKit({
