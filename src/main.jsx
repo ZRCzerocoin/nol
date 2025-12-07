@@ -1,40 +1,52 @@
-import { createAppKit } from "@reown/appkit";
-import { EthersAdapter } from "@reown/appkit-adapter-ethers";
-import { mainnet, arbitrum } from "@reown/appkit/networks";
-import { createRoot } from "react-dom/client";
-function Root() {
-  // create a safe adapter factory that only runs in browser
-const modal = createAppKit({
-  adapters: [new EthersAdapter()],
-  networks: [mainnet, arbitrum],
-  metadata,
-  projectId,
-  features: {
-    analytics: true, // Optional - defaults to your Cloud configuration
-  },
-});
+import React from 'react'
+import { createRoot } from 'react-dom/client'
+import App from './App'
+import './styles.css'
 
-  // project id is kept as env name the same you used before
-  const projectId = import.meta.env.VITE_WALLETCONNECT_PROJECT_ID || ''
+// AppKit bootstrap (createAppKit) — this runs once on app startup
+import { createAppKit } from '@reown/appkit/react'
+import { EthersAdapter } from '@reown/appkit-adapter-ethers'
+import { arbitrum, mainnet } from '@reown/appkit/networks'
 
-  // If AppKit is not present or adapter not configured, App will still run (fallback UI)
-  const metadata = {
-  name: "nol",
-  description: "nol Ex",
-  url: "https://zrczerocoin.github.io/nol", // origin must match your domain & subdomain
-  icons: ["https://avatars.githubusercontent.com/u/179229932"],
-};
-  // Trigger modal programaticaly
-// Add this code inside `main.js` file at the end of the code file
-const openConnectModalBtn = document.getElementById("open-connect-modal");
-const openNetworkModalBtn = document.getElementById("open-network-modal");
+// Read env vars
+const projectId = import.meta.env.VITE_WALLETCONNECT_PROJECT_ID || ''
+const siteName = import.meta.env.VITE_SITE_NAME || 'NOLA Exchange'
+const siteUrl = import.meta.env.VITE_SITE_URL || window.location.origin
 
-openConnectModalBtn.addEventListener("click", () => modal.open());
-openNetworkModalBtn.addEventListener("click", () =>
-  modal.open({ view: "Networks" })
-);
+// createAppKit according to your provided framework
+try{
+  createAppKit({
+    adapters: [new EthersAdapter()],
+    networks: [arbitrum, mainnet],
+    metadata: {
+      name: siteName,
+      description: `${siteName} — exchange UI`,
+      url: siteUrl,
+      icons: [siteUrl + '/logo.png']
+    },
+    projectId,
+    features: {
+      analytics: true,
+      email: true,
+      socials: true,
+      walletFeatures: {
+        // Enable full deep linking
+        pushNotifications: true,
+        explorerRedirect: true
+      }
+    },
+    // Deep linking config
+    walletConnect: {
+      deepLink: {
+        android: true,
+        ios: true
+      }
+    }
+  })
+  console.info('AppKit created')
+}catch(e){ console.warn('createAppKit failed (ok in dev)', e) }
 
-  return <App />
-}
-
-createRoot(document.getElementById('root')).render(<Root />)
+// Render root
+createRoot(document.getElementById('root')).render(
+  <App />
+)
